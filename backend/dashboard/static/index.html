@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wildlife Conservation &amp; Habitat Monitor</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/vendor/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <h1>Wildlife Conservation &amp; Habitat Monitor</h1>
+        <p class="brand-sub">Two reserves, live field-station log</p>
+      </div>
+    </div>
+    <div id="health-strip" class="health-strip"></div>
+  </header>
+
+  <section id="alert-banner" class="alert-banner" hidden></section>
+
+  <main class="content">
+    <section class="reserve-grid" aria-label="Reserve field logs">
+      <article class="reserve-column" aria-label="Reserve A">
+        <h2 class="reserve-title">Reserve A <span class="reserve-tag">reserve-a</span></h2>
+        <div id="summary-reserve-a" class="summary-strip"></div>
+        <div class="log-panel">
+          <div class="log-head">
+            <span class="log-col log-col-time">Time</span>
+            <span class="log-col log-col-sensor">Sensor</span>
+            <span class="log-col log-col-value">Reading</span>
+            <span class="log-col log-col-flag">Flag</span>
+          </div>
+          <div id="log-reserve-a" class="log-body"></div>
+        </div>
+      </article>
+
+      <article class="reserve-column" aria-label="Reserve B">
+        <h2 class="reserve-title">Reserve B <span class="reserve-tag">reserve-b</span></h2>
+        <div id="summary-reserve-b" class="summary-strip"></div>
+        <div class="log-panel">
+          <div class="log-head">
+            <span class="log-col log-col-time">Time</span>
+            <span class="log-col log-col-sensor">Sensor</span>
+            <span class="log-col log-col-value">Reading</span>
+            <span class="log-col log-col-flag">Flag</span>
+          </div>
+          <div id="log-reserve-b" class="log-body"></div>
+        </div>
+      </article>
+    </section>
+
+    <section aria-label="Waterhole level trend">
+      <h2 class="section-title">Waterhole Level Trend</h2>
+      <div class="trend-card">
+        <h4>Waterhole level (cm), by reserve</h4>
+        <canvas id="trend-waterhole" width="560" height="180"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pipeline-footer">
+    <span id="backend-stats" class="backend-stats"></span>
+  </footer>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>

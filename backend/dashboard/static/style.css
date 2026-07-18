@@ -1,0 +1,207 @@
+/* Wildlife Conservation & Habitat Monitor -- earthy forest-green / khaki
+   field-station palette. The primary structural view is a FIELD LOG: a
+   scrolling monospace ledger of readings per reserve, merged across all 5
+   sensor types and sorted newest-first, styled like a ranger-station
+   notebook -- not a tile, badge, heatmap, dial, status line, priority list,
+   matrix table, or scorecard. A compact native <meter> summary strip sits
+   above each reserve's log. No custom SVG or emoji anywhere; the monospace
+   stack below is a standard OS font family, not a custom/decorative face. */
+
+:root {
+  --khaki: #e8e2c8;
+  --khaki-panel: #f4f0dc;
+  --khaki-line: #cabf95;
+  --forest: #2f4a37;
+  --forest-deep: #203127;
+  --ink: #2a2f22;
+  --ink-dim: #6b6f52;
+  --rust: #a5501f;
+  --rust-soft: #f3ded0;
+  --ok: #3f7d4a;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--khaki);
+  color: var(--ink);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 20px 26px;
+  background: var(--forest);
+  color: var(--khaki-panel);
+  border-bottom: 3px solid var(--rust);
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 4px;
+  background: var(--rust);
+}
+.topbar h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+.brand-sub { margin: 2px 0 0; font-size: 12.5px; color: #c9d6c4; }
+
+.health-strip { display: flex; gap: 8px; flex-wrap: wrap; }
+.health-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: var(--forest-deep);
+  border: 1px solid #3d5a45;
+  color: #c9d6c4;
+}
+.health-pill .swatch { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); }
+.health-pill.down .swatch { background: var(--rust); }
+.health-pill.down { color: #f0c4a8; }
+
+.alert-banner {
+  padding: 11px 26px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--rust-soft);
+  color: var(--rust);
+  border-bottom: 1px solid var(--khaki-line);
+}
+
+.content { max-width: 1180px; margin: 0 auto; padding: 26px; display: flex; flex-direction: column; gap: 30px; }
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--forest);
+  margin: 0 0 14px;
+}
+
+.reserve-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.reserve-column {
+  background: var(--khaki-panel);
+  border: 1px solid var(--khaki-line);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reserve-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--forest);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.reserve-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--ink-dim);
+  text-transform: none;
+}
+
+/* Compact native <meter> summary strip -- secondary to the log below. */
+.summary-strip { display: flex; flex-direction: column; gap: 7px; }
+.summary-row { display: grid; grid-template-columns: 108px 1fr auto; align-items: center; gap: 8px; }
+.summary-row .summary-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; color: var(--ink-dim); text-transform: uppercase; }
+.summary-row meter { width: 100%; height: 8px; accent-color: var(--forest); }
+.summary-row meter::-webkit-meter-bar { background: var(--khaki-line); border: none; border-radius: 4px; }
+.summary-row meter::-webkit-meter-optimum-value { background: var(--forest); border-radius: 4px; }
+.summary-row.flagged meter::-webkit-meter-optimum-value,
+.summary-row.flagged meter::-webkit-meter-suboptimum-value { background: var(--rust); }
+.summary-row .summary-value { font-family: var(--mono); font-size: 11.5px; text-align: right; min-width: 64px; }
+.summary-row.flagged .summary-value { color: var(--rust); font-weight: 700; }
+
+/* Primary structural view: the field log itself. */
+.log-panel {
+  background: var(--forest-deep);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #16241b;
+}
+.log-head {
+  display: grid;
+  grid-template-columns: 84px 1fr 132px 120px;
+  gap: 8px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #9fb59a;
+  background: #182a1f;
+  border-bottom: 1px solid #223a2a;
+}
+.log-body {
+  max-height: 320px;
+  overflow-y: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.log-row {
+  display: grid;
+  grid-template-columns: 84px 1fr 132px 120px;
+  gap: 8px;
+  padding: 6px 12px;
+  color: #d9e6d2;
+  border-bottom: 1px solid #1c3024;
+}
+.log-row:last-child { border-bottom: none; }
+.log-row.flagged { background: rgba(165, 80, 31, 0.22); color: #ffd9bd; }
+.log-row .log-col-time { color: #8fa88a; }
+.log-row.flagged .log-col-time { color: #e0b090; }
+.log-row .log-col-flag { color: var(--rust); font-weight: 700; }
+.log-row .log-col-flag.clear { color: #4f6b52; font-weight: 400; }
+.log-empty { padding: 14px 12px; color: #8fa88a; font-family: var(--mono); font-size: 12px; }
+
+.trend-card {
+  background: var(--khaki-panel);
+  border: 1px solid var(--khaki-line);
+  border-radius: 8px;
+  padding: 12px 14px 8px;
+  overflow-x: auto;
+}
+.trend-card h4 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+.trend-card canvas { width: 100% !important; }
+
+.pipeline-footer {
+  padding: 12px 26px 24px;
+  font-size: 11.5px;
+  color: var(--ink-dim);
+  border-top: 1px solid var(--khaki-line);
+  max-width: 1180px;
+  margin: 0 auto;
+  font-family: var(--mono);
+}
+
+@media (max-width: 720px) {
+  .reserve-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .topbar { padding: 16px 18px; }
+  .content { padding: 16px; gap: 22px; }
+  .log-head, .log-row { grid-template-columns: 62px 1fr 92px 78px; font-size: 10.5px; }
+  .summary-row { grid-template-columns: 84px 1fr auto; }
+}
