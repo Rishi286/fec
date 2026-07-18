@@ -1,0 +1,112 @@
+name: wcm-aws
+
+x-sensor: &sensor
+  build:
+    context: ../sensors
+  environment: &sensor-env
+    FOG_URL: http://fog:8000/ingest
+  depends_on:
+    - fog
+  restart: unless-stopped
+
+services:
+  fog:
+    build:
+      context: ../fog
+    ports:
+      - "8000:8000"
+    environment:
+      WINDOW_SECONDS: "10"
+      SQS_QUEUE_NAME: wcm-reserve-agg
+      AWS_REGION: us-east-1
+    restart: unless-stopped
+
+  sensor-motion-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: motion_detection_count
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "8"
+
+  sensor-motion-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: motion_detection_count
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "9"
+
+  sensor-acoustic-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: acoustic_poaching_risk_db
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "10"
+
+  sensor-acoustic-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: acoustic_poaching_risk_db
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "11"
+
+  sensor-waterhole-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: waterhole_level_cm
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "12"
+
+  sensor-waterhole-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: waterhole_level_cm
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "13"
+
+  sensor-temp-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: ambient_temp_c
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "4"
+      DISPATCH_INTERVAL: "14"
+
+  sensor-temp-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: ambient_temp_c
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "4"
+      DISPATCH_INTERVAL: "15"
+
+  sensor-soil-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: soil_moisture_pct
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "9"
+
+  sensor-soil-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: soil_moisture_pct
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "10"
