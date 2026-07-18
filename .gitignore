@@ -1,0 +1,13 @@
+**/target/
+**/*.class
+**/*.jar
+**/*.war
+**/*.zip
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.DS_Store
+*.log
+.aws-sam/
