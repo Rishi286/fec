@@ -1,0 +1,157 @@
+name: wcm
+
+x-aws-env: &aws-env
+  AWS_ENDPOINT_URL: http://localstack:4566
+  AWS_REGION: eu-west-1
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+
+x-sensor: &sensor
+  build:
+    context: ../sensors
+  environment: &sensor-env
+    FOG_URL: http://fog:8000/ingest
+  depends_on:
+    - fog
+  restart: unless-stopped
+
+services:
+  localstack:
+    image: localstack/localstack:3.8
+    ports:
+      - "4589:4566"
+    environment:
+      SERVICES: sqs,dynamodb,lambda
+      DEBUG: "0"
+      LAMBDA_KEEPALIVE_MS: "0"
+    volumes:
+      - ./localstack/init.sh:/etc/localstack/init/ready.d/init.sh
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  fog:
+    build:
+      context: ../fog
+    environment:
+      <<: *aws-env
+      WINDOW_SECONDS: "10"
+      SQS_QUEUE_NAME: wcm-reserve-agg
+    depends_on:
+      - localstack
+    restart: unless-stopped
+
+  # one-shot: deploys WildlifeHandler as a real Lambda wired to the SQS queue
+  processor:
+    build:
+      context: ../backend/processor
+    environment:
+      <<: *aws-env
+      SQS_QUEUE_NAME: wcm-reserve-agg
+      TABLE_NAME: wcm-readings
+      LAMBDA_FUNCTION_NAME: wcm-processor
+    depends_on:
+      - localstack
+    restart: "no"
+
+  dashboard:
+    build:
+      context: ../backend/dashboard
+    ports:
+      - "8103:8000"
+    environment:
+      <<: *aws-env
+      TABLE_NAME: wcm-readings
+      SQS_QUEUE_NAME: wcm-reserve-agg
+      LAMBDA_FUNCTION_NAME: wcm-processor
+    depends_on:
+      - localstack
+    restart: unless-stopped
+
+  sensor-motion-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: motion_detection_count
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "8"
+
+  sensor-motion-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: motion_detection_count
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "9"
+
+  sensor-acoustic-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: acoustic_poaching_risk_db
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "10"
+
+  sensor-acoustic-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: acoustic_poaching_risk_db
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "2"
+      DISPATCH_INTERVAL: "11"
+
+  sensor-waterhole-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: waterhole_level_cm
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "12"
+
+  sensor-waterhole-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: waterhole_level_cm
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "13"
+
+  sensor-temp-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: ambient_temp_c
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "4"
+      DISPATCH_INTERVAL: "14"
+
+  sensor-temp-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: ambient_temp_c
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "4"
+      DISPATCH_INTERVAL: "15"
+
+  sensor-soil-a:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: soil_moisture_pct
+      SITE_ID: reserve-a
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "9"
+
+  sensor-soil-b:
+    <<: *sensor
+    environment:
+      <<: *sensor-env
+      SENSOR_TYPE: soil_moisture_pct
+      SITE_ID: reserve-b
+      SAMPLE_INTERVAL: "3"
+      DISPATCH_INTERVAL: "10"
