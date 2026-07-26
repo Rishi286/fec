@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/** Lazily resolves the SQS queue URL on first publish() with a jittered (+/-20% via ThreadLocalRandom) exponential backoff (300ms base, doubling, capped 5000ms, 12 attempts) -- the only one of nine sibling fog publishers whose retry delay is randomized rather than fixed/linear/plain-exponential, to desynchronize concurrent LocalStack queue-bootstrap races. */
+
 public class ReservePublisher {
 
     private static final long BASE_DELAY_MS = 300;
@@ -30,9 +30,7 @@ public class ReservePublisher {
 
     public ReservePublisher(String endpointUrl, String region, String queueName) {
         var builder = SqsClient.builder().region(Region.of(region));
-        // LocalStack accepts any static credentials; real AWS issues temporary
-        // ones (session token required) via the execution role, so this
-        // override must not apply outside the LocalStack case.
+
         if (endpointUrl != null) {
             builder.endpointOverride(URI.create(endpointUrl));
             builder.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")));
@@ -41,7 +39,7 @@ public class ReservePublisher {
         this.queueName = queueName;
     }
 
-    /** Test-only entry point: injects a pre-built client directly instead of going through the SqsClient.builder() endpoint/credentials wiring above. */
+
     ReservePublisher(SqsClient client, String queueName) {
         this.client = client;
         this.queueName = queueName;
@@ -93,10 +91,7 @@ public class ReservePublisher {
         client.sendMessage(SendMessageRequest.builder().queueUrl(resolveQueueUrl()).messageBody(body).build());
     }
 
-    // A single flush cycle can close several (sensor_type, site_id) groups
-    // at once; sending each as its own sendMessage() call is one SQS API
-    // call per group. This chunks the whole batch at SendMessageBatch's
-    // 10-entry limit instead, issuing at most ceil(n/10) calls per flush.
+
     public void publishBatch(List<AggregatePayload> payloads) {
         if (payloads.isEmpty()) return;
         String queueUrl = resolveQueueUrl();

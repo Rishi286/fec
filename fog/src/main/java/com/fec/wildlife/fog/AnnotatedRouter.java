@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
-/** Routes are discovered via reflection over {@code @Route}-annotated methods (bind() scans getDeclaredMethods(), dispatch() invokes via Method.invoke()) -- the only annotation/reflection-driven HTTP dispatch mechanism among this portfolio's Java fog siblings, which otherwise hard-code routes as lambdas, fluent builders, enums, linear scans, if/else chains, map lookups, or filter chains. */
+
 public class AnnotatedRouter {
 
     private record RouteEntry(String method, Method javaMethod) {}

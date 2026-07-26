@@ -1,11 +1,4 @@
-// API base resolution: fetched once at startup from a small JSON resource
-// deployed alongside this file, not baked in via a build-time token
-// substitution, a <meta> tag, or a separate config-global script (the three
-// mechanisms this portfolio's other Java/Python siblings already use). The
-// deploy step overwrites static/api-config.json in S3 with the real API
-// Gateway URL; locally (served by Tornado -- er, by WildlifeDashboardApp
-// on :8000) the committed placeholder resolves to "", so fetch() calls fall
-// back to same-origin relative paths exactly as before.
+
 let API_BASE = "";
 
 async function loadApiBase() {
@@ -16,7 +9,7 @@ async function loadApiBase() {
       API_BASE = config.apiBase || "";
     }
   } catch (e) {
-    // api-config.json missing or unreachable; API_BASE stays "" (same-origin)
+    
   }
 }
 
@@ -37,8 +30,7 @@ const ALERT_LABELS = {
   habitat_dryness_risk: "HABITAT DRYNESS",
 };
 
-// Axis bounds -- the range each summary <meter> is drawn against, not a
-// decision threshold. Real alert thresholds come from /api/thresholds.
+
 const AXIS_RANGE = {
   motion_detection_count: { lo: 0, hi: 50 },
   acoustic_poaching_risk_db: { lo: 20, hi: 100 },
@@ -89,9 +81,7 @@ function renderSummary(containerId, reserve) {
   container.innerHTML = SENSOR_TYPES.map((sensorType) => summaryRow(sensorType, reserve.metrics[sensorType])).join("");
 }
 
-// Primary structural view: a field-station LOG readout -- one row per
-// window across every sensor type, merged and sorted newest-first, styled
-// like a ranger-station notebook entry rather than a per-metric card.
+
 function logRow(entry) {
   const flagged = entry.alerts && entry.alerts.length > 0;
   const flagText = flagged ? entry.alerts.map((a) => ALERT_LABELS[a] || a).join(", ") : "clear";

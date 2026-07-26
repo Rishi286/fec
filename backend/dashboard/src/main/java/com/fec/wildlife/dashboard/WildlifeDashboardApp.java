@@ -25,14 +25,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Dashboard backend for the wildlife conservation and habitat monitoring
- * pipeline. Serves its own REST API plus the static field-station-log
- * frontend. Routes are discovered via AnnotatedRouter's reflection scan over
- * this class's @Route-annotated methods below -- see ReserveRepository for
- * the project-specific per-reserve grouping view (/api/reserves) that drives
- * the log readout.
- */
+
 public class WildlifeDashboardApp {
 
     static final ObjectMapper JSON = new ObjectMapper();
@@ -74,14 +67,10 @@ public class WildlifeDashboardApp {
         return lambda;
     }
 
-    // Package-private (not private) so WildlifeDashboardLambda -- the
-    // separate API-Gateway-facing entry point -- can build its own clients
-    // through the same endpoint/credentials wiring without duplicating it.
+ 
     static <B extends software.amazon.awssdk.awscore.client.builder.AwsClientBuilder<B, T>, T> T awsClient(B builder) {
         builder.region(Region.of(REGION));
-        // LocalStack accepts any static credentials; real AWS issues temporary
-        // ones (session token required) via the execution role, so this
-        // override must not apply outside the LocalStack case.
+
         if (ENDPOINT != null) {
             builder.endpointOverride(URI.create(ENDPOINT));
             builder.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")));
@@ -119,10 +108,7 @@ public class WildlifeDashboardApp {
     }
 
     private synchronized String thresholds() throws Exception {
-        // Cached for the process lifetime: HabitatAlerts.CATALOG is a
-        // static, code-defined constant compiled once at fog startup, so
-        // refetching it on every /api/thresholds call would just be a
-        // repeated round-trip with no fresher data to show for it.
+
         if (thresholdsCache == null) {
             thresholdsCache = thresholdsGateway.fetch(upstream, FOG_THRESHOLDS_URL);
         }

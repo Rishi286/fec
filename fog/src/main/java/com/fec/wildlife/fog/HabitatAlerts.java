@@ -7,7 +7,7 @@ import java.util.function.ToDoubleFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** The 8th distinct alert-rule idiom in this portfolio's Java fog projects: rules are parsed once at class-init from human-readable DSL strings ("sensor_type avg&gt;75 -&gt; alert_key") via SPEC_PATTERN into CompiledRule instances holding already-bound extractor/test closures, so every evaluate() call is pure closure invocation with no field-name or operator branching left at runtime. */
+
 public class HabitatAlerts {
 
     private static final Pattern SPEC_PATTERN =
@@ -18,8 +18,7 @@ public class HabitatAlerts {
         compile("waterhole_level_cm avg<20 -> drought_stress_risk"),
         compile("motion_detection_count max>30 -> unusual_activity_surge"),
         compile("soil_moisture_pct avg<10 -> habitat_dryness_risk")
-        // ambient_temp_c intentionally has no rule spec here: one of the 5
-        // required sensor types, shown on the dashboard, but never alerting.
+
     );
 
     static ToDoubleFunction<WindowAggregate> extractorFor(String field) {

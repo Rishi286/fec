@@ -15,23 +15,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Real AWS Lambda entry point, registered with an SQS event-source mapping in deploy_lambda.sh. */
+
 public class WildlifeHandler implements RequestHandler<SQSEvent, Map<String, Object>> {
 
     static final String TABLE_NAME = System.getenv().getOrDefault("TABLE_NAME", "wcm-readings");
     static DynamoDbClient client;
 
-    // Lambda (even under LocalStack) can reuse a warm execution environment
-    // across invocations, so the client is cached in a static field instead
-    // of being rebuilt on every handleRequest() call.
+
     static synchronized DynamoDbClient client() {
         if (client == null) {
             String endpoint = System.getenv("AWS_ENDPOINT_URL");
             String region = System.getenv().getOrDefault("AWS_REGION", "eu-west-1");
             var builder = DynamoDbClient.builder().region(Region.of(region));
-            // LocalStack accepts any static credentials; real AWS issues temporary
-            // ones (session token required) via the execution role, so this
-            // override must not apply outside the LocalStack case.
+
             if (endpoint != null) {
                 builder.endpointOverride(URI.create(endpoint));
                 builder.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")));
@@ -49,10 +45,7 @@ public class WildlifeHandler implements RequestHandler<SQSEvent, Map<String, Obj
                 dynamo.putItem(PutItemRequest.builder().tableName(tableName).item(item).build());
                 processed++;
             } catch (Exception e) {
-                // Deliberately fail the whole batch on any single bad record
-                // rather than skipping it: the SQS event source mapping will
-                // then leave the batch unacked and retry it, the simplest
-                // correct behaviour at this CA's demo scale.
+
                 throw new RuntimeException(e);
             }
         }

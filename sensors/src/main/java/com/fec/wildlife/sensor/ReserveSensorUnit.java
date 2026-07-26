@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** CompletableFuture.delayedExecutor self-rescheduling chains (no Thread/Timer/ExecutorService) feeding a lock-free ConcurrentLinkedDeque -- the 6th distinct Java sensor scheduling idiom in this portfolio. */
+
 public class ReserveSensorUnit {
 
     record Profile(String unit, double lo, double hi, double start, double step) {}
@@ -38,11 +38,7 @@ public class ReserveSensorUnit {
         return Math.max(lo, Math.min(hi, value));
     }
 
-    // Bounded random walk from the previous value, not a fresh draw each
-    // tick, so consecutive samples stay close together like a real sensor
-    // trace -- this is what makes the fog's windowed min/max/avg and the
-    // dashboard's log readout look like plausible reserve telemetry rather
-    // than white noise.
+   
     static double nextValue(double current, Profile profile) {
         double delta = ThreadLocalRandom.current().nextDouble(-profile.step(), profile.step());
         double moved = clamp(current + delta, profile.lo(), profile.hi());
@@ -74,7 +70,7 @@ public class ReserveSensorUnit {
         }
     }
 
-    /** Re-arms itself forever via CompletableFuture.delayedExecutor -- no Thread/Timer/ExecutorService involved. */
+    
     static void scheduleSample(String sensorType, Profile profile, AtomicReference<Double> current,
                                 ConcurrentLinkedDeque<Reading> buffer, long sampleMillis) {
         CompletableFuture
@@ -105,10 +101,7 @@ public class ReserveSensorUnit {
         if (dispatch(client, fogUrl, body)) {
             System.out.printf("%s dispatched %d readings%n", sensorType, batch.size());
         } else {
-            // No lock is needed to put the batch back: offerFirst() in
-            // reverse order restores original arrival order at the head of
-            // the deque, ahead of anything sampled while dispatch was
-            // in flight, so a failed POST never silently loses readings.
+            
             for (int i = batch.size() - 1; i >= 0; i--) buffer.offerFirst(batch.get(i));
         }
     }
