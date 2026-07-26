@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: mvn -B test
+        working-directory: sensors
+      - run: mvn -B test
+        working-directory: fog
+      - run: mvn -B test
+        working-directory: backend/processor
+      - run: mvn -B test
+        working-directory: backend/dashboard
+
+  integration:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install boto3
+      - name: Bring up the local stack
+        run: docker compose -f infra/docker-compose.yml up -d --build
+      - name: Verify end-to-end data flow
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+        run: python infra/verify_pipeline.py
+      - name: Collect stack logs
+        if: failure()
+        run: docker compose -f infra/docker-compose.yml logs
+      - name: Tear down
+        if: always()
+        run: docker compose -f infra/docker-compose.yml down -v
