@@ -71,7 +71,7 @@ The fog node and sensor containers are only reachable on the internal Docker net
 
 AWS DEPLOYMENT STEPS
 -----------------------
-This project has no terraform/deployments/*.tfvars file yet. Deployment uses the Terraform module in terraform/. Follow these steps to deploy:
+Deployment uses the Terraform module in terraform/, driven by the settings file terraform/deployments/wcm.tfvars. The frontend does not read its API base from index.html: dashboard.js fetches static/api-config.json at page load, so that file carries the __API_BASE__ token and the deploy step substitutes the real API Gateway URL into it; the unsubstituted token resolves to same-origin locally. Follow these steps to deploy:
 
 1. Configure AWS credentials for the target AWS account (access key, secret key, and session token if using temporary credentials), then confirm the active identity:
    aws sts get-caller-identity
@@ -81,32 +81,13 @@ This project has no terraform/deployments/*.tfvars file yet. Deployment uses the
    terraform workspace new wcm
    terraform workspace list
 
-3. Create terraform/deployments/wcm.tfvars, defining: prefix, project_root, table_name, queue_name, processor_lambda_name/build_command/zip_path/handler/runtime, dashboard_lambda_name/build_command/zip_path/handler/runtime, frontend_local_dir, api_base_placeholder, api_base_search_files. This project's real values are:
-   prefix                  = "wcm"
-   project_root            = "../projects/24-wildlife-conservation-monitoring"
-   table_name              = "wcm-readings"
-   queue_name              = "wcm-reserve-agg"
-   processor_lambda_name   = "wcm-processor"
-   processor_build_command = "cd backend/processor && mvn package -DskipTests -q"
-   processor_zip_path      = "backend/processor/target/processor.jar"
-   processor_handler       = "com.fec.wildlife.processor.WildlifeHandler::handleRequest"
-   processor_runtime       = "java17"
-   dashboard_lambda_name   = "wcm-dashboard-api"
-   dashboard_build_command = "cd backend/dashboard && mvn package -DskipTests -q"
-   dashboard_zip_path      = "backend/dashboard/target/dashboard.jar"
-   dashboard_handler       = "com.fec.wildlife.dashboard.WildlifeDashboardLambda::handleRequest"
-   dashboard_runtime       = "java17"
-   frontend_local_dir      = "backend/dashboard/static"
-
-   Note: this project's frontend does not read its API base from a placeholder embedded in index.html. dashboard.js fetches static/api-config.json at page load and reads its "apiBase" field, so api_base_search_files should list api-config.json (not index.html), and api_base_placeholder should match whatever token you put in that file's "apiBase" value ahead of the deploy-time substitution.
-
-4. Build the Lambda jars and the EC2 source tarball, then apply:
+3. Build the Lambda jars and the EC2 source tarball, then apply:
    ./build.sh deployments/wcm.tfvars
    terraform apply -var-file=deployments/wcm.tfvars
 
    Read the plan output before confirming; a nonzero "destroy" count against a shared-module apply is a stop-and-check signal.
 
-5. Switch back to the default workspace when finished:
+4. Switch back to the default workspace when finished:
    terraform workspace select default
 
 TESTING INSTRUCTIONS
@@ -118,4 +99,4 @@ Each module has its own JUnit 5 test suite, run independently with Maven:
   cd backend/processor && mvn test        -> 5 tests
   cd backend/dashboard && mvn test        -> 26 tests
 
-Total: 82 tests across all four modules. All 82 pass as of this writing (verified by running each module's test suite).
+Total: 82 tests across all four modules. All 82 pass as of this writing.

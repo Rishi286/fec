@@ -18,17 +18,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Real API Gateway REST API entry point for the dashboard's REST endpoints
- * -- a 5th distinct dispatch shape in this portfolio's dashboard-Lambda
- * lineage (after project 15's ordered regex-list scan, 22's trie-walk
- * router, 01's Mangum-wrapped-FastAPI-native-routes reuse, and 23's flat
- * dict[(method,path)] lookup): a Java switch expression on "METHOD path"
- * calling straight into ReserveRepository/PipelineChecks/ThresholdsGateway
- * -- the same classes WildlifeDashboardApp's HttpExchange-based routes use
- * locally. AnnotatedRouter's reflection-driven binding registers
- * HttpServer createContext() callbacks and can't be reused as-is inside a
- * synchronous Lambda invocation without an ASGI/WSGI-style compatibility
- * shim, so this class owns its own routing instead.
+ * Real API Gateway REST API entry point for the dashboard's REST endpoints:
+ * a Java switch expression on "METHOD path" calling straight into
+ * ReserveRepository/PipelineChecks/ThresholdsGateway -- the same classes
+ * WildlifeDashboardApp's HttpExchange-based routes use locally.
+ * AnnotatedRouter's reflection-driven binding registers HttpServer
+ * createContext() callbacks and can't be reused as-is inside a synchronous
+ * Lambda invocation without an ASGI/WSGI-style compatibility shim, so this
+ * class owns its own routing instead.
  */
 public class WildlifeDashboardLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 

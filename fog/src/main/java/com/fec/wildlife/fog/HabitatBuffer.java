@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-
+/** Lock-free AtomicReference&lt;Map&lt;FieldKey,List&lt;Reading&gt;&gt;&gt; mutated only via updateAndGet() whole-structure copy-on-write retries: every ingest (not just the flush) is a CAS retry over the entire map rather than a per-key lock/queue/actor/merge. */
 public class HabitatBuffer {
 
     private final AtomicReference<Map<FieldKey, List<Reading>>> state = new AtomicReference<>(Map.of());
@@ -25,7 +25,7 @@ public class HabitatBuffer {
         if (unit != null && !unit.isEmpty()) units.put(sensorType, unit);
     }
 
-    
+    /** Atomically detaches the whole buffer, resetting the live reference to empty in the same step. */
     public Map<FieldKey, List<Reading>> drainAll() {
         return state.getAndSet(Map.of());
     }

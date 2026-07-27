@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
 
-/** A class-specific StdSerializer registered via SimpleModule on a dedicated ObjectMapper -- the 7th distinct JSON-serialization idiom among this portfolio's Java fog services, versus siblings' ObjectNode.put() calls, plain POJO writeValueAsString, fluent JsonBuilder, raw JsonGenerator streaming, valueToTree() mutation, or StringBuilder concatenation. */
+/** A class-specific StdSerializer registered via SimpleModule on a dedicated ObjectMapper. */
 public class AggregateSerializer extends StdSerializer<AggregatePayload> {
 
     public AggregateSerializer() {

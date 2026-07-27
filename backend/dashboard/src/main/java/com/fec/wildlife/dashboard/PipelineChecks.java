@@ -49,7 +49,11 @@ public class PipelineChecks {
         }
     }
 
-
+    // A single Select.COUNT scan only counts the ~1MB page DynamoDB happens
+    // to return, silently undercounting any table larger than that. The
+    // fix uses the SDK's own scanPaginator() -- an Iterable that follows
+    // LastEvaluatedKey across pages automatically -- rather than a hand-
+    // rolled loop, do-while, or recursive call.
     public int itemCount(DynamoDbClient dynamo, String tableName) {
         ScanRequest request = ScanRequest.builder().tableName(tableName).select(Select.COUNT).build();
         int total = 0;

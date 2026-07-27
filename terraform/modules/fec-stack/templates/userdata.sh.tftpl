@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+dnf install -y docker
+systemctl enable --now docker
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -SL https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+mkdir -p ${work_dir}
+cd ${work_dir}
+aws s3 cp s3://${deploy_bucket}/${tarball_key} ${tarball_key} --region ${region}
+tar -xzf ${tarball_key}
+
+cd ${work_dir}/infra
+docker compose -f ${compose_file} up -d --build

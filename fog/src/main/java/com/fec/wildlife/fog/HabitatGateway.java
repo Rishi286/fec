@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
+/** Routes are discovered by AnnotatedRouter via reflection over this class's own @Route-annotated methods, not a manual dispatch table. */
 public class HabitatGateway {
 
     static final ObjectMapper JSON = new ObjectMapper();
@@ -134,7 +134,10 @@ public class HabitatGateway {
 
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         long periodMs = (long) (WINDOW_SECONDS * 1000);
-
+        // Initial delay is also periodMs (not 0) so the first flush only fires
+        // once a full window has actually accumulated -- flushing at t=0 would
+        // emit an aggregate over an empty/near-empty buffer before any sensor
+        // has had a chance to dispatch a reading into it.
         scheduler.scheduleAtFixedRate(gateway::runWindowCycle, periodMs, periodMs, TimeUnit.MILLISECONDS);
     }
 }

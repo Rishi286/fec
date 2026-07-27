@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
+/** DynamoDB access: recent windows per sensor type, and the project-specific per-reserve grouping view. */
 class ReserveRepository {
 
     static Object unwrap(AttributeValue av) {
@@ -47,7 +47,7 @@ class ReserveRepository {
         return items;
     }
 
-
+    /** Per-reserve view whose primary structure is a "log" -- all fetched windows across every sensor type flattened into one window_end-descending ledger, not a per-metric card grid. */
     Map<String, Object> byReserve(DynamoDbClient client, String tableName, String[] sensorTypes,
                                   int historyPerType, int logEntriesPerReserve) {
         Map<String, Map<String, Object>> metricsBySite = new TreeMap<>();
